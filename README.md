@@ -30,9 +30,9 @@ python main_cifar.py --theta_r 0.9 --noise_mode sym --noise_ratio 0.2 --dataset 
 
 Example runs on WebVision/Clothing1M dataset~(Approximately ~16GB memory for clothing1M and ~36GB for WebVision, considering reduce the batch size or parallel training with more GPUs if you don't have enough GPU memory.):
 ```
-python main_webvision.py --dataset_path ./WebVision --gpuid 0
+python main_webvision.py --dataset_path ./WebVision --gpuid 0,1 --parallel
 
-python main_clothing1m.py --dataset_path ./Clothing1M --gpuid 0,1 --parallel
+python main_clothing1m.py --dataset_path ./Clothing1M --gpuid 0
 ```
 
 For users who are not familiar with wandb, please try `main_cifar_simple.py` with same config.
