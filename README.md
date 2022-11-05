@@ -4,7 +4,7 @@
     <img src="sources/method.png" alt="drawing" width="800"/>
 </p>
 
-This is the official PyTorch implementation of BMVC2022 submission 372 ([SSR: An Efficient and Robust Framework for Learning with Noisy Labels](https://arxiv.org/abs/2111.11288)). 
+This is the official PyTorch implementation of BMVC2022 paper   ([SSR: An Efficient and Robust Framework for Learning with Noisy Labels](https://arxiv.org/abs/2111.11288)). 
 
 ### Abstract
 Despite the large progress in supervised learning with neural networks, there are significant challenges in obtaining high-quality, large-scale and accurately labeled datasets. In such a context, how to learn in the presence of noisy labels hasCancel changes received more and more attention. As a relatively comprehensive problem, in order to achieve good results, the current methods often integrate technologies from multiple fields, such as supervised learning, semi-supervised learning, transfer learning, and so on. At the same time, these methods often make strong or weak assumptions about the noise of the data. This also inevitably brings about the problem of model robustness.
