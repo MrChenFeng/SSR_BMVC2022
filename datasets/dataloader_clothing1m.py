@@ -31,7 +31,7 @@ class clothing_dataset(Dataset):
                 self.test_labels[img_path] = int(entry[1])
 
         # started random selected evaluate samples
-        if self.mode == 'eval':
+        if self.mode == 'eval': # select part of samples for subsequent training [clothing1m only]
             train_imgs = []
             with open('%s/noisy_train_key_list.txt' % self.root, 'r') as f:
                 lines = f.read().splitlines()
@@ -48,7 +48,6 @@ class clothing_dataset(Dataset):
                 if class_num[label] < (num_samples / 14) and len(self.train_imgs) < num_samples:
                     self.train_imgs.append(impath)
                     class_num[label] += 1
-            # print(class_num)
             random.shuffle(self.train_imgs)
 
         elif self.mode == "unlabeled":
@@ -60,11 +59,6 @@ class clothing_dataset(Dataset):
             # self.train_imgs = paths[subset]
             self.semi_labels = labels[subset].cpu()
             class_num = [torch.sum(self.semi_labels == i) for i in range(14)]
-            print(class_num)
-            # print(len(self.semi_labels))
-            # print(len(self.train_imgs))
-            # print(self.semi_labels[:10])
-            # print(self.train_imgs[:10])
 
         elif self.mode == 'test':
             self.test_imgs = []
@@ -74,13 +68,6 @@ class clothing_dataset(Dataset):
                     img_path = '%s/' % self.root + l  # [7:]
                     self.test_imgs.append(img_path)
 
-        elif self.mode == 'val':
-            self.val_imgs = []
-            with open('%s/clean_val_key_list.txt' % self.root, 'r') as f:
-                lines = f.read().splitlines()
-                for l in lines:
-                    img_path = '%s/' % self.root + l  # [7:]
-                    self.val_imgs.append(img_path)
 
     def __getitem__(self, index):
         if self.mode == 'train':
@@ -111,17 +98,9 @@ class clothing_dataset(Dataset):
             image = Image.open(img_path).convert('RGB')
             img = self.transform(image)
             return img, target, img_path
-        elif self.mode == 'val':
-            img_path = self.val_imgs[index]
-            target = self.test_labels[img_path]
-            image = Image.open(img_path).convert('RGB')
-            img = self.transform(image)
-            return img, target, img_path
 
     def __len__(self):
         if self.mode == 'test':
             return len(self.test_imgs)
-        if self.mode == 'val':
-            return len(self.val_imgs)
         else:
             return len(self.train_imgs)

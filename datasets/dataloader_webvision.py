@@ -1,14 +1,11 @@
-from torch.utils.data import Dataset, DataLoader
-import torchvision.transforms as transforms
-import random
-import numpy as np
-from PIL import Image
-import torch
 import os
+
+from PIL import Image
+from torch.utils.data import Dataset
 
 
 class imagenet_dataset(Dataset):
-    def __init__(self, transform, num_class=50, root_dir='/import/nobackup_mmv_ioannisp/fc312/datasets'):
+    def __init__(self, transform, num_class=50, root_dir='./'):
         # self.root = root_dir + '/val/'
         self.root = root_dir + '/imagenet_val/'
         self.transform = transform
@@ -38,7 +35,7 @@ class miniwebvision_dataset(Dataset):
         self.mode = dataset_mode
 
         if self.mode == 'test':
-            with open(self.root + 'info/val_filelist.txt') as f:
+            with open(self.root + '/info/val_filelist.txt') as f:
                 lines = f.readlines()
             self.val_imgs = []
             self.val_labels = {}
@@ -49,7 +46,7 @@ class miniwebvision_dataset(Dataset):
                     self.val_imgs.append(img)
                     self.val_labels[img] = target
         elif self.mode == 'train':
-            with open(self.root + 'info/train_filelist_google.txt') as f:
+            with open(self.root + '/info/train_filelist_google.txt') as f:
                 lines = f.readlines()
             self.train_imgs = []
             # self.train_labels = {}
@@ -71,22 +68,16 @@ class miniwebvision_dataset(Dataset):
             raise ValueError(f'Dataset mode should be train rather than {self.mode}!')
 
     def __getitem__(self, index):
-        # if self.mode == 'train':
-        #     img_path = self.train_imgs[index]
-        #     target = self.train_labels[img_path]
-        #     image = Image.open(self.root + img_path).convert('RGB')
-        #     img = self.transform(image)
-        #     return img, target, index
         if self.mode == 'train':
             img_path = self.train_imgs[index]
             target = self.train_labels[index]
-            image = Image.open(self.root + img_path).convert('RGB')
+            image = Image.open(self.root + '/' + img_path).convert('RGB')
             img = self.transform(image)
             return img, target, index
         elif self.mode == 'test':
             img_path = self.val_imgs[index]
             target = self.val_labels[img_path]
-            image = Image.open(self.root + 'val_images_256/' + img_path).convert('RGB')
+            image = Image.open(self.root + '/val_images_256/' + img_path).convert('RGB')
             img = self.transform(image)
             return img, target, index
 

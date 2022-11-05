@@ -1,3 +1,8 @@
+'''
+Update 2022.11.5
+To ensure a direct minimal reproduction applicable, I removed the codes on imagenet evaluation. [Marked with *]
+To evaluate on iamgenet, please modify the code yourself
+'''
 import argparse
 
 import torchvision.transforms as transforms
@@ -11,7 +16,10 @@ from models.inceptionresnetv2 import InceptionResNetV2
 from utils import *
 
 parser = argparse.ArgumentParser('Train with Webvision dataset')
-parser.add_argument('--dataset_path', default='~/WebVision/', help=f'model architecture (default: PreResNet18)')
+parser.add_argument('--dataset_path', default='~/WebVision', help=f'dataset path')
+#*************************************************************************************************************#
+# parser.add_argument('--imagenet_path', default='~/ImageNet', help=f'dataset_path for imagenet evaluation')
+#*************************************************************************************************************#
 
 # model settings
 parser.add_argument('--lambda_fc', default=1, type=float, metavar='N', help='weight of unlabeled data (default: 1)')
@@ -157,49 +165,7 @@ def main():
         os.mkdir(f'webvision')
     if not os.path.isdir(f'webvision/{args.run_path}'):
         os.mkdir(f'webvision/{args.run_path}')
-
-    ############################# Dataset initialization ##############################################
     args.num_classes = 50
-    args.num_finetune = 1
-    normalize = transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
-
-    weak_transform = transforms.Compose([
-        transforms.Resize(320),
-        transforms.RandomResizedCrop(299),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        normalize])
-    none_transform = transforms.Compose([
-        transforms.Resize(320),
-        transforms.CenterCrop(299),
-        transforms.ToTensor(),
-        normalize])  # no augmentation
-    strong_transform = transforms.Compose([transforms.Resize(320),
-                                           transforms.RandomResizedCrop(299),
-                                           transforms.RandomHorizontalFlip(),
-                                           ImageNetPolicy(),
-                                           transforms.ToTensor(),
-                                           normalize])
-    test_transform = none_transform
-
-    ###########################################################################
-
-    eval_data = miniwebvision_dataset(root_dir=args.dataset_path, transform=weak_transform, dataset_mode='train',num_class=args.num_classes)
-    test_data = miniwebvision_dataset(root_dir=args.dataset_path, transform=test_transform, dataset_mode='test', num_class=args.num_classes)
-    test_data2 = imagenet_dataset(transform=test_transform)
-    train_data = miniwebvision_dataset(root_dir=args.dataset_path, transform=KCropsTransform(strong_transform, 2),
-                                       dataset_mode='train', num_class=args.num_classes)
-
-    all_data = miniwebvision_dataset(root_dir=args.dataset_path, transform=MixTransform(strong_transform, weak_transform, 1),
-                                     dataset_mode='train', num_class=args.num_classes)
-
-    noisy_label = torch.tensor(eval_data.train_labels).cuda()
-
-    eval_loader = torch.utils.data.DataLoader(eval_data, batch_size=args.batch_size * 10, shuffle=False, pin_memory=True, num_workers=4)
-    test_loader = torch.utils.data.DataLoader(test_data, batch_size=args.batch_size, shuffle=False, pin_memory=True, num_workers=4)
-    test_loader2 = torch.utils.data.DataLoader(test_data2, batch_size=args.batch_size, shuffle=False, pin_memory=True, num_workers=4)
-    all_loader = torch.utils.data.DataLoader(all_data, batch_size=args.batch_size, num_workers=4, shuffle=True)
-
 
     ################################ Model initialization ###########################################
     encoder = InceptionResNetV2(args.num_classes)
@@ -224,6 +190,49 @@ def main():
         proj_head = torch.nn.DataParallel(proj_head).cuda()
         pred_head = torch.nn.DataParallel(pred_head).cuda()
 
+    ############################# Dataset initialization ##############################################
+    normalize = transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
+
+    weak_transform = transforms.Compose([
+        transforms.Resize(320),
+        transforms.RandomResizedCrop(299),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        normalize])
+    none_transform = transforms.Compose([
+        transforms.Resize(320),
+        transforms.CenterCrop(299),
+        transforms.ToTensor(),
+        normalize])  # no augmentation
+    strong_transform = transforms.Compose([transforms.Resize(320),
+                                           transforms.RandomResizedCrop(299),
+                                           transforms.RandomHorizontalFlip(),
+                                           ImageNetPolicy(),
+                                           transforms.ToTensor(),
+                                           normalize])
+    test_transform = none_transform
+
+    eval_data = miniwebvision_dataset(root_dir=args.dataset_path, transform=weak_transform, dataset_mode='train',num_class=args.num_classes)
+    test_data = miniwebvision_dataset(root_dir=args.dataset_path, transform=test_transform, dataset_mode='test', num_class=args.num_classes)
+    train_data = miniwebvision_dataset(root_dir=args.dataset_path, transform=KCropsTransform(strong_transform, 2),
+                                       dataset_mode='train', num_class=args.num_classes)
+
+    all_data = miniwebvision_dataset(root_dir=args.dataset_path, transform=MixTransform(strong_transform, weak_transform, 1),
+                                     dataset_mode='train', num_class=args.num_classes)
+
+    noisy_label = torch.tensor(eval_data.train_labels).cuda()
+
+    eval_loader = torch.utils.data.DataLoader(eval_data, batch_size=args.batch_size * 10, shuffle=False, pin_memory=True, num_workers=4)
+    test_loader = torch.utils.data.DataLoader(test_data, batch_size=args.batch_size, shuffle=False, pin_memory=True, num_workers=4)
+
+    all_loader = torch.utils.data.DataLoader(all_data, batch_size=args.batch_size, num_workers=4, shuffle=True)
+
+    # *************************************************************************************************************#
+    # to evaluate on imagenet_datset
+    # test_data2 = imagenet_dataset(transform=test_transform)
+    # test_loader2 = torch.utils.data.DataLoader(test_data2, batch_size=args.batch_size, shuffle=False, pin_memory=True, num_workers=4)
+    # *************************************************************************************************************#
+
     #################################### Training initialization #######################################
     optimizer = SGD([{'params': encoder.parameters()}, {'params': classifier.parameters()}, {'params': proj_head.parameters()},
                      {'params': pred_head.parameters()}], lr=args.lr, weight_decay=args.weight_decay, momentum=args.momentum)
@@ -233,8 +242,8 @@ def main():
     acc_logs = open(f'webvision/{args.run_path}/acc.txt', 'w')
     stat_logs = open(f'webvision/{args.run_path}/stat.txt', 'w')
     save_config(args, f'{args.run_path}')
-    best_acc1img = 0
-    best_acc5img = 0
+    # best_acc1img = 0
+    # best_acc5img = 0
     best_acc1web = 0
     best_acc5web = 0
     print('Train args: \n', args)
@@ -255,14 +264,20 @@ def main():
         stat_logs.flush()
 
         cur_acc1web, cur_acc5web = test(test_loader, encoder, classifier, i)
-        cur_acc1img, cur_acc5img = test(test_loader2, encoder, classifier, i)
         scheduler.step()
-        logger.log({'xloss': xloss, 'uloss': uloss, 'imgnet_acc1': cur_acc1img, 'imgnet_acc5': cur_acc5img, 'web_acc1': cur_acc1web, 'web_acc5': cur_acc5web})
 
-        if cur_acc5img > best_acc5img:
-            best_acc5img = cur_acc5img
-        if cur_acc1img > best_acc1img:
-            best_acc1img = cur_acc1img
+        # *************************************************************************************************************#
+        # cur_acc1img, cur_acc5img = test(test_loader2, encoder, classifier, i)
+        # logger.log({'xloss': xloss, 'uloss': uloss, 'imgnet_acc1': cur_acc1img, 'imgnet_acc5': cur_acc5img, 'web_acc1': cur_acc1web, 'web_acc5': cur_acc5web})
+        # if cur_acc5img > best_acc5img:
+        #     best_acc5img = cur_acc5img
+        # if cur_acc1img > best_acc1img:
+        #     best_acc1img = cur_acc1img
+        # *************************************************************************************************************#
+
+        logger.log({'xloss': xloss, 'uloss': uloss, 'web_acc1': cur_acc1web, 'web_acc5': cur_acc5web})
+
+
         if cur_acc5web > best_acc5web:
             best_acc5web = cur_acc5web
         if cur_acc1web > best_acc1web:
@@ -277,8 +292,8 @@ def main():
             }, filename=f'webvision/{args.run_path}/best_acc.pth.tar')
         acc_logs.write(
             f'Epoch [{i}/{args.epochs}]: web Best accuracy@1#:{best_acc1web}! Current accuracy@1#:{cur_acc1web}! Best accuracy@5#:{best_acc5web}! Current accuracy@5#:{cur_acc5web}\n')
-        acc_logs.write(
-            f'Epoch [{i}/{args.epochs}]: img Best accuracy@1#:{best_acc1img}! Current accuracy@1#:{cur_acc1img}! Best accuracy@5#:{best_acc5img}! Current accuracy@5#:{cur_acc5img}\n')
+        # acc_logs.write(
+        #     f'Epoch [{i}/{args.epochs}]: img Best accuracy@1#:{best_acc1img}! Current accuracy@1#:{cur_acc1img}! Best accuracy@5#:{best_acc5img}! Current accuracy@5#:{cur_acc5img}\n')
         acc_logs.flush()
     save_checkpoint({
         'cur_epoch': i,

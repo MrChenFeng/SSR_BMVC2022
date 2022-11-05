@@ -9,6 +9,7 @@ class animal_dataset(Dataset):
         train_path = os.listdir(os.path.abspath(root) + '/training')
         test_path = os.listdir(os.path.abspath(root) + '/testing')
         # print(train_path)
+        print('Please be patient for image loading!')
         if mode == 'train':
             dir_path = os.path.abspath(root) + '/training'
             self.targets = [int(i.split('_')[0]) for i in train_path]
@@ -17,6 +18,7 @@ class animal_dataset(Dataset):
             dir_path = os.path.abspath(root) + '/testing'
             self.targets = [int(i.split('_')[0]) for i in test_path]
             self.data = [np.asarray(Image.open(dir_path + '/' + i)) for i in test_path]
+        print('Loading finished!')
 
         self.transform = transform
 

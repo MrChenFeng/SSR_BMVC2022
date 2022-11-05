@@ -158,14 +158,13 @@ def main():
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpuid
 
     args.num_classes = 14
+
+    ################################ Model initialization ###########################################
     # use pretrained encoder
     encoder = resnet50(pretrained=True)
-
-    # ######################################################################################
     dim = encoder.fc.in_features
 
     def init_weights(m):
-        print(m)
         if type(m) == nn.Linear:
             nn.init.normal_(m.weight, 0, 0.001)
             nn.init.constant_(m.bias, 0)
@@ -195,13 +194,9 @@ def main():
         classifier = torch.nn.DataParallel(classifier).cuda()
         proj_head = torch.nn.DataParallel(proj_head).cuda()
         pred_head = torch.nn.DataParallel(pred_head).cuda()
-    ###########################################################################
 
+    ############################# Dataset initialization ##############################################
     # mini-webvision augmentations
-    if args.aug_method == 'auto':
-        extra = ImageNetPolicy()
-    else:
-        extra = RandAugment()
     weak_transform = transforms.Compose([
         transforms.Resize(256),
         transforms.RandomCrop(224),
@@ -213,7 +208,7 @@ def main():
         transforms.Resize(256),
         transforms.RandomCrop(224),
         transforms.RandomHorizontalFlip(),
-        extra,
+        ImageNetPolicy(),
         transforms.ToTensor(),
         transforms.Normalize((0.6959, 0.6537, 0.6371), (0.3113, 0.3192, 0.3214))
     ])
@@ -226,33 +221,18 @@ def main():
 
     test_transform = none_transform
 
-    if args.aug_train == 'w':
-        train_transform = weak_transform
-    elif args.aug_train == 's':
-        train_transform = strong_transform
-    else:
-        raise ValueError(f'args.aug_train should be w or s, rather than {args.aug_train}!')
-
-    if args.aug_eval == 'n':
-        eval_transform = none_transform
-    elif args.aug_eval == 'w':
-        eval_transform = weak_transform
-    elif args.aug_eval == 's':
-        eval_transform = strong_transform
-    else:
-        raise ValueError(f'args.aug_eval should be w/s/n, rather than {args.aug_eval}!')
-
     # generate noisy dataset with our transformation
     if not os.path.isdir(f'clothing1m'):
         os.mkdir(f'clothing1m')
     if not os.path.isdir(f'clothing1m/{args.run_path}'):
         os.mkdir(f'clothing1m/{args.run_path}')
 
-    ###########################################################################
     # genarate train dataset with only filtered clean subset
     test_data = clothing_dataset(root_dir=args.dataset_path, transform=test_transform, dataset_mode='test')
     test_loader = torch.utils.data.DataLoader(test_data, batch_size=args.batch_size*10, shuffle=False, num_workers=4, pin_memory=True)
 
+
+    #################################### Training initialization #######################################
     optimizer = SGD([{'params': encoder.parameters()}, {'params': classifier.parameters()}, {'params': proj_head.parameters()},
                      {'params': pred_head.parameters()}],
                     lr=args.lr, weight_decay=args.weight_decay, momentum=args.momentum)
@@ -261,22 +241,23 @@ def main():
 
     save_config(args, f'clothing1m/{args.run_path}')
     print('Train args: \n', args)
-    ###########################################################################
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[50, 100], gamma=0.1)
     
     best_acc = 0
+
+    ################################ Training loop ###########################################
     for i in range(args.epochs):
-        eval_data = clothing_dataset(root_dir=args.dataset_path, transform=eval_transform, dataset_mode='eval', num_samples=1000 * args.batch_size)
+        eval_data = clothing_dataset(root_dir=args.dataset_path, transform=weak_transform, dataset_mode='eval', num_samples=1000 * args.batch_size)
         eval_loader = torch.utils.data.DataLoader(eval_data, batch_size=args.batch_size*10, shuffle=False, num_workers=4)  # , pin_memory=True)
         clean_id, noisy_id, modified_label, paths = evaluate(eval_loader, encoder, classifier, args)
 
         print(f'Epoch [{i}/{args.epochs}]: clean samples: {len(clean_id)}, noisy samples: {len(noisy_id)}')
 
-        labeled_data = clothing_dataset(root_dir=args.dataset_path, transform=KCropsTransform(train_transform, 2), dataset_mode='train', paths=paths, subset=clean_id, labels=modified_label)
+        labeled_data = clothing_dataset(root_dir=args.dataset_path, transform=KCropsTransform(strong_transform, 2), dataset_mode='train', paths=paths, subset=clean_id, labels=modified_label)
         sampler = ClassBalancedSampler(labels=modified_label[clean_id], num_classes=args.num_classes)
         labeled_loader = torch.utils.data.DataLoader(labeled_data, batch_size=args.batch_size, sampler=sampler, num_workers=4)#, drop_last=True)
 
-        all_data = clothing_dataset(root_dir=args.dataset_path, transform=MixTransform(strong_transform, weak_transform, 1), dataset_mode='all', paths=paths)
+        all_data = clothing_dataset(root_dir=args.dataset_path, transform=MixTransform(strong_transform, weak_transform, 1), dataset_mode='unlabeled', paths=paths)
         all_loader = torch.utils.data.DataLoader(all_data, batch_size=args.batch_size, num_workers=4, shuffle=True)#, drop_last=True)
 
         train(labeled_loader, all_loader, encoder, classifier, proj_head, pred_head, optimizer, i, args)

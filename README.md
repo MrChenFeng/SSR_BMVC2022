@@ -1,30 +1,15 @@
 ## SSR: An Efficient and Robust Framework for Learning with Unknown Label Noise
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/s3-supervised-self-supervised-learning-under-1/learning-with-noisy-labels-on-animal)](https://paperswithcode.com/sota/learning-with-noisy-labels-on-animal?p=s3-supervised-self-supervised-learning-under-1)
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/s3-supervised-self-supervised-learning-under-1/image-classification-on-mini-webvision-1-0)](https://paperswithcode.com/sota/image-classification-on-mini-webvision-1-0?p=s3-supervised-self-supervised-learning-under-1)
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/s3-supervised-self-supervised-learning-under-1/image-classification-on-clothing1m)](https://paperswithcode.com/sota/image-classification-on-clothing1m?p=s3-supervised-self-supervised-learning-under-1)
 
 <p align="center">
-    <img src="./sources/method.png" alt="drawing" width="800"/>
+    <img src="sources/method.png" alt="drawing" width="800"/>
 </p>
 
-
-
-
-This is the official PyTorch implementation of BMVC2022 paper (***[SSR: An Efficient and Robust Framework for Learning with Noisy Labels](https://arxiv.org/abs/2111.11288)***). 
+This is the official PyTorch implementation of BMVC2022 submission 372 ([SSR: An Efficient and Robust Framework for Learning with Noisy Labels](https://arxiv.org/abs/2111.11288)). 
 
 ### Abstract
 Despite the large progress in supervised learning with neural networks, there are significant challenges in obtaining high-quality, large-scale and accurately labeled datasets. In such a context, how to learn in the presence of noisy labels hasCancel changes received more and more attention. As a relatively comprehensive problem, in order to achieve good results, the current methods often integrate technologies from multiple fields, such as supervised learning, semi-supervised learning, transfer learning, and so on. At the same time, these methods often make strong or weak assumptions about the noise of the data. This also inevitably brings about the problem of model robustness.
 Striving for simplicity and robustness, we propose an efficient and robust framework named Sample Selection and Relabelling(SSR), that minimizes the number of modules and hyperparameters required, and that achieves good results in various conditions. In the heart of our method is a sample selection and relabelling mechanism based on a non-parametric KNN classifier $g_q$ and a parametric model classifier $g_p$ , respectively, to select the clean samples and gradually relabel the closed-set noise samples.
-Without bells and whistles, such as model co-training, self-supervised pertaining, and semi-supervised learning, and with robustness concerning settings of its few hyper-parameters, our method significantly surpasses previous methods on both CIFAR10/CIFAR100 with synthetic noise and real-world noisy datasets such as WebVision, Clothing1M and ANIMAL-10N. Code is available at https://github.com/MrChenFeng/SSR_BMVC2022.
-
-```
-@article{feng2021s3,
-  title={S3: Supervised Self-supervised Learning under Label Noise},
-  author={Feng, Chen and Tzimiropoulos, Georgios and Patras, Ioannis},
-  journal={arXiv preprint arXiv:2111.11288},
-  year={2021}
-}
-```
+Without bells and whistles, such as model co-training, self-supervised pertaining, and semi-supervised learning, and with robustness concerning settings of its few hyper-parameters, our method significantly surpasses previous methods on both CIFAR10/CIFAR100 with synthetic noise and real-world noisy datasets such as WebVision, Clothing1M and ANIMAL-10N. Code is available at https://github.com/AnonymousBMVC2022/BMVC2022_Paper372.
 
 ### Preparation
 - pytorch
@@ -41,6 +26,15 @@ python main_cifar.py --theta_r 0.8 --noise_mode sym --noise_ratio 0.8 --dataset 
 python main_cifar.py --theta_r 0.8 --noise_mode sym --noise_ratio 0.5 --dataset cifar100 --dataset_path path_to_cifar100
 
 python main_cifar.py --theta_r 0.9 --noise_mode sym --noise_ratio 0.2 --dataset cifar100 --dataset_path path_to_cifar100
+```
+
+Example runs on WebVision/Clothing1M dataset~(Approximately ~16GB memory for clothing1M and ~36GB for WebVision, considering reduce the batch size or parallel training with more GPUs if you don't have enough GPU memory.):
+```
+
+python main_webvision.py --dataset_path /import/nobackup_mmv_ioannisp/fc312/datasets/WebVision --gpuid 0
+
+python main_clothing1m.py --dataset_path /import/nobackup_mmv_ioannisp/fc312/datasets/Clothing1M --gpuid 0,1 --parallel
+
 ```
 
 For users who are not familiar with wandb, please try `main_cifar_simple.py` with same config.
@@ -64,6 +58,18 @@ For users who are not familiar with wandb, please try `main_cifar_simple.py` wit
 | C2D*          |    96.4   |    95.3   |    94.4   |    93.6   |    93.5    |    78.7   |    76.4   |    67.8   |    58.7   |
 | SSR(ours)     |    96.3   |    95.7   |    95.2   |    94.6   |    95.1    |    79.0   |    75.9   |    69.5   |    61.8   |
 | SSR+(ours)    |  **96.7** |  **96.1** |  **95.6** |  **95.2** |  **95.5**  |  **79.7** |  **77.2** |  **71.9** |  **66.6** |
+
+
+Please considering cite our paper if you find this repo useful:
+```
+@article{feng2021s3,
+  title={S3: Supervised Self-supervised Learning under Label Noise},
+  author={Feng, Chen and Tzimiropoulos, Georgios and Patras, Ioannis},
+  journal={arXiv preprint arXiv:2111.11288},
+  year={2021}
+}
+```
+For the older version, please refer to: [S3: Supervised Self-supervised Learning under Label Noise](https://arxiv.org/abs/2111.11288v1).
 
 ### License
 This project is licensed under the terms of the MIT license.

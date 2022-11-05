@@ -201,7 +201,6 @@ def main():
     )
 
     def init_weights(m):
-        print(m)
         if type(m) == nn.Linear:
             nn.init.normal_(m.weight, 0, 0.005)
             nn.init.constant_(m.bias, 0)
@@ -235,7 +234,7 @@ def main():
 
     ################################ Training loop ###########################################
     for i in range(args.epochs):
-        clean_id, noisy_id, modified_label = evaluate(eval_loader, encoder, classifier, args, noisy_label,i)
+        clean_id, noisy_id, modified_label = evaluate(eval_loader, encoder, classifier, args, noisy_label)
 
         clean_subset = Subset(train_data, clean_id.cpu())
         sampler = ClassBalancedSampler(labels=modified_label[clean_id], num_classes=args.num_classes)
