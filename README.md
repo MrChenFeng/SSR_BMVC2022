@@ -1,5 +1,10 @@
 ## SSR: An Efficient and Robust Framework for Learning with Unknown Label Noise
 
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/s3-supervised-self-supervised-learning-under-1/image-classification-on-cifar-10-with-noisy)](https://paperswithcode.com/sota/image-classification-on-cifar-10-with-noisy?p=s3-supervised-self-supervised-learning-under-1)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/s3-supervised-self-supervised-learning-under-1/learning-with-noisy-labels-on-animal)](https://paperswithcode.com/sota/learning-with-noisy-labels-on-animal?p=s3-supervised-self-supervised-learning-under-1)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/s3-supervised-self-supervised-learning-under-1/image-classification-on-mini-webvision-1-0)](https://paperswithcode.com/sota/image-classification-on-mini-webvision-1-0?p=s3-supervised-self-supervised-learning-under-1)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/s3-supervised-self-supervised-learning-under-1/image-classification-on-clothing1m)](https://paperswithcode.com/sota/image-classification-on-clothing1m?p=s3-supervised-self-supervised-learning-under-1)
+
 <p align="center">
     <img src="sources/method.png" alt="drawing" width="800"/>
 </p>
