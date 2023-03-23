@@ -64,12 +64,14 @@ For users who are not familiar with wandb, please try `main_cifar_simple.py` wit
 
 
 Please considering cite our paper if you find this repo useful:
-```
-@article{feng2021s3,
-  title={S3: Supervised Self-supervised Learning under Label Noise},
-  author={Feng, Chen and Tzimiropoulos, Georgios and Patras, Ioannis},
-  journal={arXiv preprint arXiv:2111.11288},
-  year={2021}
+```bibtex
+@inproceedings{Feng_2022_BMVC,
+author    = {Chen Feng and Georgios Tzimiropoulos and Ioannis Patras},
+title     = {SSR: An Efficient and Robust Framework for Learning with Unknown Label Noise},
+booktitle = {33rd British Machine Vision Conference 2022, {BMVC} 2022, London, UK, November 21-24, 2022},
+publisher = {{BMVA} Press},
+year      = {2022},
+url       = {https://bmvc2022.mpi-inf.mpg.de/0372.pdf}
 }
 ```
 For the older version, please refer to: [S3: Supervised Self-supervised Learning under Label Noise](https://arxiv.org/abs/2111.11288v1).
