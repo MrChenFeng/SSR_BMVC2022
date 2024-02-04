@@ -28,7 +28,7 @@ year      = {2022},
 url       = {https://bmvc2022.mpi-inf.mpg.de/0372.pdf}
 }
 ```
-Please considering cite our paper if you find this repo useful.
+Please considering cite our paper and star the repo if you find this repo useful.
 
 ### Preparation
 - pytorch
