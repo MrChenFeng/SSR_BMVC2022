@@ -52,10 +52,12 @@ def train(labeled_trainloader, modified_label, all_trainloader, encoder, classif
     all_bar = tqdm(all_trainloader)
     for batch_idx, ([inputs_u1, inputs_u2], _, _, _) in enumerate(all_bar):
         try:
-            [inputs_x1, inputs_x2], labels_x, _, index = labeled_train_iter.next()
+            # [inputs_x1, inputs_x2], labels_x, _, index = labeled_train_iter.next()
+            [inputs_x1, inputs_x2], labels_x, _, index = next(labeled_train_iter)
         except:
             labeled_train_iter = iter(labeled_trainloader)
-            [inputs_x1, inputs_x2], labels_x, _, index = labeled_train_iter.next()
+            # [inputs_x1, inputs_x2], labels_x, _, index = labeled_train_iter.next()
+            [inputs_x1, inputs_x2], labels_x, _, index = next(labeled_train_iter)
 
         # cross-entropy training with mixup
         batch_size = inputs_x1.size(0)
