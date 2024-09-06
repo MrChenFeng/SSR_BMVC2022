@@ -5,6 +5,10 @@
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/s3-supervised-self-supervised-learning-under-1/image-classification-on-mini-webvision-1-0)](https://paperswithcode.com/sota/image-classification-on-mini-webvision-1-0?p=s3-supervised-self-supervised-learning-under-1)
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/s3-supervised-self-supervised-learning-under-1/image-classification-on-clothing1m)](https://paperswithcode.com/sota/image-classification-on-clothing1m?p=s3-supervised-self-supervised-learning-under-1)
 
+**[New Update]
+*We have extended this conference paper into a journal article! 
+You can find the expanded journal version here: [NoiseBox: Towards More Efficient and Effective Learning with Noisy Labels.](https://ieeexplore.ieee.org/document/10594806)***
+
 <p align="center">
     <img src="sources/method.png" alt="drawing" width="800"/>
 </p>
