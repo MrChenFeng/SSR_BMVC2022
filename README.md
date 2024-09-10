@@ -13,7 +13,7 @@ You can find the expanded journal version here: [NoiseBox: Towards More Efficien
     <img src="sources/method.png" alt="drawing" width="800"/>
 </p>
 
-This is the official PyTorch implementation of BMVC2022 paper ([SSR: An Efficient and Robust Framework for Learning with Noisy Labels](https://arxiv.org/abs/2111.11288)). 
+This is the official PyTorch implementation of BMVC2022 paper([SSR: An Efficient and Robust Framework for Learning with Noisy Labels](https://arxiv.org/abs/2111.11288)). 
 
 
 
